@@ -17,18 +17,38 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
+    - name: Build and push
+      uses: docker/build-push-action@v6
+      with:
+        push: false
+        tags: test:latest
+
     - name: Install Syft
       run: |
         curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
 
     - name: Generate SBOM
       run: |
-        #syft docker.io/library/nginx:latest -o cyclonedx-xml > sbom.xml
-        syft docker.io/kodekloud/webapp-color:latest -o spdx-json=spdx.json
+        #syft docker.io/kodekloud/webapp-color:latest -o spdx-json=spdx.json
+        syft test:latest -o spdx-json=spdx.json
 
     - name: Upload SBOM Artifact
       uses: actions/upload-artifact@v3
       with:
         name: spdx-report
         path: spdx.json
+
+    - name: Install Grype
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+    - name: Vulnerability scan
+      run: |
+        grype test:latest -o spdx-json=vulnerability-json.json
+
+    - name: Upload vulnerability report
+      uses: actions/upload-artifact@v3
+      with:
+        name: vulnerability-report
+        path: vulnerability-json.json
 
