@@ -44,7 +44,7 @@ jobs:
 
     - name: Vulnerability scan
       run: |
-        grype test:latest -o spdx-json=vulnerability-json.json
+        grype test:latest -o json=vulnerability-json.json
 
     - name: Upload vulnerability report
       uses: actions/upload-artifact@v3
